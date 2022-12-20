@@ -1,10 +1,7 @@
-import os
 from flask import Flask
-from flask_jwt_extended import jwt_manager
 
 # models import
 from .models import db, ma, migrate, jwt
-from flask_sqlalchemy import SQLAlchemy
 
 # controllers import
 from .controllers.user_controller import user_api as user_blueprint
@@ -12,10 +9,8 @@ from .controllers.user_controller import user_api as user_blueprint
 from api.Config import Config
 
 
-# from extensions import db
-
 def create_app(env_name):
-    api_url = '/api/v1/'
+    # api_url = '/api/v1/'
     app = Flask(__name__)
     app.config.from_object(Config)
 
