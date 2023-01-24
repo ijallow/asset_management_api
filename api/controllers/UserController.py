@@ -1,21 +1,27 @@
-from flask import Flask, request, jsonify, make_response, Blueprint
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask import request, jsonify, Blueprint
+from flask_jwt_extended import (create_access_token,
+                                get_jwt_identity,
+                                jwt_required,
+                                create_refresh_token,
+                                get_jwt)
+from http import HTTPStatus
 
-from ..models.user import User, UserSchema
-from ..services.auth import hash_password, check_password
+from ..models.UserModel import UserModel, UserSchema
+from ..services.auth import hash_password, check_password, login_service
 
 user_api = Blueprint('users', __name__)
 
-User_schema = UserSchema(many=True)
+users_schema = UserSchema(many=True)
 user_schema = UserSchema()
 
 
 # for getting all users
 @user_api.route('/users', methods=["GET"])
 def get_all_users():
-    users = User.query.all()
+    users = UserModel.query.all()
+    output = []
     if users:
-        output = []
+
         for user in users:
             data = {
                 'username': user.username,
@@ -29,29 +35,22 @@ def get_all_users():
 # for adding a user
 @user_api.route('/users', methods=['POST'])
 def create_user():
-    data = request.get_json()
+    json_data = request.get_json()
 
-    username = data.get('username')
-    email = data.get('email')
-    non_hash_password = data.get('password')
+    username = json_data.get('username')
+    email = json_data.get('email')
+    non_hash_password = json_data.get('password')
 
-    if User.get_by_username(username):
+    if UserModel.get_by_username(username):
         return {'message': 'username already used'}
 
-    if User.get_by_email(email):
+    if UserModel.get_by_email(email):
         return {'message': 'email already used'}
 
     password = hash_password(non_hash_password)
 
-    user = User(
-        username=username,
-        email=email,
-        password=password
-    )
-
+    user = UserModel(username=username, email=email, password=password)
     user.save()
-
-    output = []
 
     data = {
         'id': user.id,
@@ -59,33 +58,13 @@ def create_user():
         'email': user.email
     }
 
-    output.append(data)
-
-    return jsonify({'user', output}),
-
-
-# for loggin in users
-@user_api.route('/users/login', methods=['POST'])
-def login():
-    data = request.get_json()
-
-    email = data.get('email')
-    password = data.get('password')
-
-    user = User.get_by_email(email=email)
-
-    if not user or not check_password(password, user.password):
-        return {'message': 'email or password is incorrect'}
-
-    access_token = create_access_token(identity=user.id)
-
-    return {'access_token': access_token}
+    return jsonify({'user': data})
 
 
 @user_api.route('/users/<string:username>', methods=['GET'])
 @jwt_required(optional=True)
 def get_user(username):
-    user = User.get_by_username(username=username)
+    user = UserModel.get_by_username(username=username)
 
     if user is None:
         return {'message': 'user not found'}
@@ -105,3 +84,7 @@ def get_user(username):
         }
 
     return user_schema.jsonify(data)
+
+
+
+
