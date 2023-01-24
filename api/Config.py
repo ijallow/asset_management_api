@@ -10,6 +10,8 @@ class Config:
     SECRET_KEY = environ.get('SECRET_KEY')
     JWT_ERROR_MESSAGE_KEY = environ.get('JWT_ERROR_MESSAGE_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    JWT_BLACKLIST_ENABLED = environ.get('JWT_BLACKLIST_ENABLED')
+    JWT_BLACKLIST_TOKEN_CHECKS = environ.get('JWT_BLACKLIST_TOKEN_CHECKS')
 
 
 class Development:

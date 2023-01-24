@@ -1,11 +1,12 @@
 # from extensions import db
 from . import db, ma
+from ..services.auth import hash_password
 # from marshmallow_sqlalchemy import ModelSchema
 from marshmallow import fields
 
 
-class User(db.Model):
-    __tablename__ = 'user'
+class UserModel(db.Model):
+    __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True)
@@ -14,6 +15,7 @@ class User(db.Model):
 
     created_at = db.Column(db.DateTime(), nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), nullable=False, server_default=db.func.now(), onupdate=db.func.now())
+
 
     @classmethod
     def get_by_username(cls, username):
